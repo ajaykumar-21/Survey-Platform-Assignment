@@ -1,7 +1,8 @@
 import express from "express";
 import cors from "cors";
 
-const surveyRoutes = require("./routes/survey.routes");
+import authRoutes from "./routes/auth.routes";
+import surveyRoutes from "./routes/survey.routes";
 
 const app = express();
 
@@ -12,7 +13,8 @@ app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
-// Use survey routes
+// Use auth and survey routes
+app.use("/api/auth", authRoutes);
 app.use("/api/surveys", surveyRoutes);
 
 export default app;
