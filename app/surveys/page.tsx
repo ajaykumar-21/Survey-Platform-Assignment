@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,10 +11,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import {
   PlusCircle,
   Search,
@@ -29,249 +35,247 @@ import {
   CheckCircle2,
   AlertCircle,
   MoreHorizontal,
-} from "lucide-react"
-import { Checkbox } from "@/components/ui/checkbox"
-import { format } from "date-fns"
-import { useToast } from "@/hooks/use-toast"
+} from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 export default function MySurveysPage() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedSurveys, setSelectedSurveys] = useState<string[]>([])
-  const [activeTab, setActiveTab] = useState("all")
-  const [viewMode, setViewMode] = useState<"list" | "grid">("list")
-  const { toast } = useToast()
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSurveys, setSelectedSurveys] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState("all");
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const { toast } = useToast();
 
   // Mock data for surveys - now we'll load from localStorage if available
-  const [allSurveys, setAllSurveys] = useState([
-    {
-      id: "1",
-      title: "Product Satisfaction Survey",
-      description: "Collect feedback after customers use our product",
-      responses: 245,
-      completionRate: 68,
-      status: "active",
-      created: "2023-05-12",
-      lastUpdated: "2023-06-15",
-    },
-    {
-      id: "2",
-      title: "Customer Expectations Survey",
-      description: "Understand what customers expect before buying",
-      responses: 189,
-      completionRate: 72,
-      status: "active",
-      created: "2023-06-03",
-      lastUpdated: "2023-06-10",
-    },
-    {
-      id: "3",
-      title: "Website User Experience",
-      description: "Gather feedback about our website experience",
-      responses: 312,
-      completionRate: 85,
-      status: "active",
-      created: "2023-04-28",
-      lastUpdated: "2023-05-30",
-    },
-    {
-      id: "4",
-      title: "Product Feature Preferences",
-      description: "Learn which features customers value most",
-      responses: 0,
-      completionRate: 0,
-      status: "draft",
-      created: "2023-07-01",
-      lastUpdated: "2023-07-01",
-    },
-    {
-      id: "5",
-      title: "Delivery Experience Survey",
-      description: "Feedback on our delivery process",
-      responses: 178,
-      completionRate: 62,
-      status: "active",
-      created: "2023-05-20",
-      lastUpdated: "2023-06-02",
-    },
-    {
-      id: "6",
-      title: "Customer Support Satisfaction",
-      description: "Rate our customer support experience",
-      responses: 203,
-      completionRate: 75,
-      status: "active",
-      created: "2023-06-15",
-      lastUpdated: "2023-06-28",
-    },
-    {
-      id: "7",
-      title: "Brand Perception Study",
-      description: "Understand how customers perceive our brand",
-      responses: 156,
-      completionRate: 58,
-      status: "active",
-      created: "2023-03-10",
-      lastUpdated: "2023-04-15",
-    },
-    {
-      id: "8",
-      title: "Checkout Process Feedback",
-      description: "Evaluate the checkout experience on our website",
-      responses: 0,
-      completionRate: 0,
-      status: "draft",
-      created: "2023-07-05",
-      lastUpdated: "2023-07-05",
-    },
-    {
-      id: "9",
-      title: "Product Return Experience",
-      description: "Gather feedback about the return process",
-      responses: 87,
-      completionRate: 45,
-      status: "completed",
-      created: "2023-02-18",
-      lastUpdated: "2023-03-20",
-    },
-    {
-      id: "10",
-      title: "Email Marketing Effectiveness",
-      description: "Measure the impact of our email campaigns",
-      responses: 124,
-      completionRate: 52,
-      status: "completed",
-      created: "2023-01-25",
-      lastUpdated: "2023-02-28",
-    },
-  ])
-
-  const [surveys, setSurveys] = useState(allSurveys)
+  const [allSurveys, setAllSurveys] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [surveys, setSurveys] = useState(allSurveys);
 
   // Load surveys from localStorage on component mount
+  // useEffect(() => {
+  //   const savedSurveys = localStorage.getItem("surveys");
+  //   if (savedSurveys) {
+  //     try {
+  //       const parsedSurveys = JSON.parse(savedSurveys);
+  //       // Combine with default surveys
+  //       setAllSurveys((prev) => {
+  //         // Create a map of existing IDs to avoid duplicates
+  //         const existingIds = new Set(prev.map((s) => s.id));
+  //         // Filter out any saved surveys that might duplicate existing ones
+  //         const newSurveys = parsedSurveys.filter(
+  //           (s: any) => !existingIds.has(s.id)
+  //         );
+  //         return [...prev, ...newSurveys];
+  //       });
+  //     } catch (error) {
+  //       console.error("Error loading surveys from localStorage:", error);
+  //     }
+  //   }
+  // }, []);
+
   useEffect(() => {
-    const savedSurveys = localStorage.getItem("surveys")
-    if (savedSurveys) {
+    const fetchSurveys = async () => {
+      setLoading(true);
+      setError("");
+
       try {
-        const parsedSurveys = JSON.parse(savedSurveys)
-        // Combine with default surveys
-        setAllSurveys((prev) => {
-          // Create a map of existing IDs to avoid duplicates
-          const existingIds = new Set(prev.map((s) => s.id))
-          // Filter out any saved surveys that might duplicate existing ones
-          const newSurveys = parsedSurveys.filter((s: any) => !existingIds.has(s.id))
-          return [...prev, ...newSurveys]
-        })
-      } catch (error) {
-        console.error("Error loading surveys from localStorage:", error)
+        const token = localStorage.getItem("token"); // or however you’re storing the auth token
+
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/surveys`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch surveys");
+        }
+
+        const data = await res.json();
+        setAllSurveys(data.data.surveys);
+      } catch (err: any) {
+        console.error("Error fetching surveys:", err);
+        setError(err.message || "Something went wrong");
+      } finally {
+        setLoading(false);
       }
-    }
-  }, [])
+    };
+
+    fetchSurveys();
+  }, []);
 
   // Filter surveys based on active tab
   useEffect(() => {
     if (activeTab === "all") {
-      setSurveys(allSurveys)
+      setSurveys(allSurveys);
     } else {
-      setSurveys(allSurveys.filter((survey) => survey.status === activeTab))
+      setSurveys(allSurveys.filter((survey) => survey.status === activeTab));
     }
-  }, [activeTab, allSurveys])
+  }, [activeTab, allSurveys]);
 
   // Filter surveys based on search query
   const filteredSurveys = surveys.filter(
     (survey) =>
       survey.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      survey.description.toLowerCase().includes(searchQuery.toLowerCase()),
-  )
+      survey.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const toggleSelectSurvey = (id: string) => {
-    setSelectedSurveys((prev) => (prev.includes(id) ? prev.filter((surveyId) => surveyId !== id) : [...prev, id]))
-  }
+    setSelectedSurveys((prev) =>
+      prev.includes(id)
+        ? prev.filter((surveyId) => surveyId !== id)
+        : [...prev, id]
+    );
+  };
 
   const selectAllSurveys = () => {
     if (selectedSurveys.length === filteredSurveys.length) {
-      setSelectedSurveys([])
+      setSelectedSurveys([]);
     } else {
-      setSelectedSurveys(filteredSurveys.map((survey) => survey.id))
+      setSelectedSurveys(filteredSurveys.map((survey) => survey.id));
     }
-  }
+  };
 
-  const deleteSurvey = (id: string) => {
+  const deleteSurvey = async (id: string) => {
     // Remove from state
-    const updatedSurveys = allSurveys.filter((survey) => survey.id !== id)
-    setAllSurveys(updatedSurveys)
-    setSelectedSurveys(selectedSurveys.filter((surveyId) => surveyId !== id))
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`/api/surveys/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    // Update localStorage
-    localStorage.setItem("surveys", JSON.stringify(updatedSurveys))
+      if (!res.ok) throw new Error("Failed to delete survey");
+      const updatedSurveys = allSurveys.filter((survey) => survey.id !== id);
+      setAllSurveys(updatedSurveys);
+      setSelectedSurveys(selectedSurveys.filter((surveyId) => surveyId !== id));
 
-    toast({
-      title: "Survey Deleted",
-      description: "The survey has been permanently deleted.",
-    })
-  }
+      // Update localStorage
+      localStorage.setItem("surveys", JSON.stringify(updatedSurveys));
 
-  const deleteSelectedSurveys = () => {
-    // Remove from state
-    const updatedSurveys = allSurveys.filter((survey) => !selectedSurveys.includes(survey.id))
-    setAllSurveys(updatedSurveys)
-    setSelectedSurveys([])
-
-    // Update localStorage
-    localStorage.setItem("surveys", JSON.stringify(updatedSurveys))
-
-    toast({
-      title: "Surveys Deleted",
-      description: `${selectedSurveys.length} surveys have been permanently deleted.`,
-    })
-  }
-
-  const duplicateSurvey = (id: string) => {
-    const surveyToDuplicate = allSurveys.find((survey) => survey.id === id)
-    if (!surveyToDuplicate) return
-
-    const newSurvey = {
-      ...surveyToDuplicate,
-      id: `${Date.now()}`,
-      title: `${surveyToDuplicate.title} (Copy)`,
-      responses: 0,
-      completionRate: 0,
-      status: "draft",
-      created: format(new Date(), "yyyy-MM-dd"),
-      lastUpdated: format(new Date(), "yyyy-MM-dd"),
+      toast({
+        title: "Survey Deleted",
+        description: "The survey has been permanently deleted.",
+      });
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Error",
+        description: "Failed to delete survey. Please try again.",
+        variant: "destructive",
+      });
     }
+  };
 
-    // Update state
-    const updatedSurveys = [...allSurveys, newSurvey]
-    setAllSurveys(updatedSurveys)
+  const deleteSelectedSurveys = async () => {
+    // Remove from state
+    try {
+      const token = localStorage.getItem("token");
 
-    // Update localStorage
-    localStorage.setItem("surveys", JSON.stringify(updatedSurveys))
+      await Promise.all(
+        selectedSurveys.map((id) =>
+          fetch(`/api/surveys/${id}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+          })
+        )
+      );
 
-    toast({
-      title: "Survey Duplicated",
-      description: "A copy of the survey has been created as a draft.",
-    })
-  }
+      const updatedSurveys = allSurveys.filter(
+        (survey) => !selectedSurveys.includes(survey.id)
+      );
+      setAllSurveys(updatedSurveys);
+      setSelectedSurveys([]);
+
+      // Update localStorage
+      localStorage.setItem("surveys", JSON.stringify(updatedSurveys));
+
+      toast({
+        title: "Surveys Deleted",
+        description: `${selectedSurveys.length} surveys have been permanently deleted.`,
+      });
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Error",
+        description: "Failed to delete selected surveys. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const duplicateSurvey = async (id: string) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`/api/surveys/${id}/duplicate`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) throw new Error("Failed to duplicate survey");
+
+      const data = await res.json();
+      // Update state
+      const updatedSurveys = [...allSurveys, data.newSurvey];
+      setAllSurveys(updatedSurveys);
+
+      // Update localStorage
+      localStorage.setItem("surveys", JSON.stringify(updatedSurveys));
+
+      toast({
+        title: "Survey Duplicated",
+        description: "A copy of the survey has been created as a draft.",
+      });
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to duplicate survey. Please try again.",
+        variant: "destructive",
+      });
+    }
+    // const surveyToDuplicate = allSurveys.find((survey) => survey.id === id);
+    // if (!surveyToDuplicate) return;
+
+    // const newSurvey = {
+    //   ...surveyToDuplicate,
+    //   id: `${Date.now()}`,
+    //   title: `${surveyToDuplicate.title} (Copy)`,
+    //   responses: 0,
+    //   completionRate: 0,
+    //   status: "draft",
+    //   created: format(new Date(), "yyyy-MM-dd"),
+    //   lastUpdated: format(new Date(), "yyyy-MM-dd"),
+    // };
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
-        return <Badge className="bg-green-500">Active</Badge>
+        return <Badge className="bg-green-500">Active</Badge>;
       case "draft":
-        return <Badge variant="outline">Draft</Badge>
+        return <Badge variant="outline">Draft</Badge>;
       case "completed":
-        return <Badge variant="secondary">Completed</Badge>
+        return <Badge variant="secondary">Completed</Badge>;
       default:
-        return <Badge variant="outline">{status}</Badge>
+        return <Badge variant="outline">{status}</Badge>;
     }
-  }
+  };
 
   return (
     <div className="container mx-auto py-10">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">My Surveys</h1>
-          <p className="text-muted-foreground mt-1">Manage and analyze all your surveys</p>
+          <p className="text-muted-foreground mt-1">
+            Manage and analyze all your surveys
+          </p>
         </div>
         <Link href="/surveys/create">
           <Button>
@@ -334,7 +338,12 @@ export default function MySurveysPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="w-full mb-6">
+      <Tabs
+        defaultValue="all"
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="w-full mb-6"
+      >
         <TabsList>
           <TabsTrigger value="all">All Surveys</TabsTrigger>
           <TabsTrigger value="active">Active</TabsTrigger>
@@ -360,7 +369,11 @@ export default function MySurveysPage() {
               <Copy className="mr-2 h-4 w-4" />
               Duplicate
             </Button>
-            <Button variant="destructive" size="sm" onClick={deleteSelectedSurveys}>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={deleteSelectedSurveys}
+            >
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
             </Button>
@@ -375,7 +388,8 @@ export default function MySurveysPage() {
           </div>
           <h3 className="text-lg font-medium mb-1">No surveys found</h3>
           <p className="text-muted-foreground mb-4 max-w-md">
-            We couldn't find any surveys matching your search. Try adjusting your filters or create a new survey.
+            We couldn't find any surveys matching your search. Try adjusting
+            your filters or create a new survey.
           </p>
           <Link href="/surveys/create">
             <Button>
@@ -392,7 +406,10 @@ export default function MySurveysPage() {
                 <th className="text-left p-3 font-medium text-sm">
                   <div className="flex items-center gap-2">
                     <Checkbox
-                      checked={selectedSurveys.length === filteredSurveys.length && filteredSurveys.length > 0}
+                      checked={
+                        selectedSurveys.length === filteredSurveys.length &&
+                        filteredSurveys.length > 0
+                      }
                       onCheckedChange={selectAllSurveys}
                     />
                     <span>Survey</span>
@@ -400,15 +417,22 @@ export default function MySurveysPage() {
                 </th>
                 <th className="text-left p-3 font-medium text-sm">Status</th>
                 <th className="text-left p-3 font-medium text-sm">Responses</th>
-                <th className="text-left p-3 font-medium text-sm">Completion</th>
+                <th className="text-left p-3 font-medium text-sm">
+                  Completion
+                </th>
                 <th className="text-left p-3 font-medium text-sm">Created</th>
-                <th className="text-left p-3 font-medium text-sm">Last Updated</th>
+                <th className="text-left p-3 font-medium text-sm">
+                  Last Updated
+                </th>
                 <th className="text-right p-3 font-medium text-sm">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredSurveys.map((survey, index) => (
-                <tr key={survey.id} className={index % 2 === 0 ? "bg-background" : "bg-muted/20"}>
+                <tr
+                  key={survey.id}
+                  className={index % 2 === 0 ? "bg-background" : "bg-muted/20"}
+                >
                   <td className="p-3">
                     <div className="flex items-center gap-2">
                       <Checkbox
@@ -417,7 +441,9 @@ export default function MySurveysPage() {
                       />
                       <div>
                         <div className="font-medium">{survey.title}</div>
-                        <div className="text-sm text-muted-foreground">{survey.description}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {survey.description}
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -441,7 +467,9 @@ export default function MySurveysPage() {
                             style={{ width: `${survey.completionRate}%` }}
                           ></div>
                         </div>
-                        <span className="text-sm">{survey.completionRate}%</span>
+                        <span className="text-sm">
+                          {survey.completionRate}%
+                        </span>
                       </div>
                     ) : (
                       <span className="text-sm text-muted-foreground">N/A</span>
@@ -480,12 +508,17 @@ export default function MySurveysPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => duplicateSurvey(survey.id)}>
+                          <DropdownMenuItem
+                            onClick={() => duplicateSurvey(survey.id)}
+                          >
                             <Copy className="mr-2 h-4 w-4" />
                             <span>Duplicate</span>
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => deleteSurvey(survey.id)} className="text-red-500">
+                          <DropdownMenuItem
+                            onClick={() => deleteSurvey(survey.id)}
+                            className="text-red-500"
+                          >
                             <Trash2 className="mr-2 h-4 w-4" />
                             <span>Delete</span>
                           </DropdownMenuItem>
@@ -502,7 +535,8 @@ export default function MySurveysPage() {
 
       <div className="mt-6 flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
-          Showing <strong>{filteredSurveys.length}</strong> of <strong>{surveys.length}</strong> surveys
+          Showing <strong>{filteredSurveys.length}</strong> of{" "}
+          <strong>{surveys.length}</strong> surveys
         </div>
         <div className="flex gap-1">
           <Button variant="outline" size="sm" disabled>
@@ -514,5 +548,5 @@ export default function MySurveysPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

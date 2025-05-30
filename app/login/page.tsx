@@ -19,6 +19,9 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronLeft, ClipboardCheck } from "lucide-react";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+console.log(API_URL);
 export default function LoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -35,11 +38,12 @@ export default function LoginPage() {
     // Simulate login process
 
     try {
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
+
       const data = await response.json();
 
       if (data.success) {
@@ -62,13 +66,18 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const response = await fetch("/api/auth/register", {
+      // const API_URL = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${API_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
       });
 
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Registration failed.");
+      }
 
       if (data.success) {
         localStorage.setItem("token", data.data.token);
@@ -77,12 +86,13 @@ export default function LoginPage() {
       } else {
         setError(data.message || "Registration failed.");
       }
-    } catch (err) {
-      setError("Registration failed. Please try again.");
+    } catch (err: any) {
+      setError(err.message || "Registration failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
+
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
       <Link
@@ -161,7 +171,7 @@ export default function LoginPage() {
 
           <TabsContent value="register">
             <Card>
-              <form onSubmit={handleLogin}>
+              <form onSubmit={handleRegister}>
                 <CardHeader>
                   <CardTitle>Create an account</CardTitle>
                   <CardDescription>

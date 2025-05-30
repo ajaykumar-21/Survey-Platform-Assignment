@@ -8,9 +8,10 @@ import { protect } from "../middleware/auth.middleware";
 
 router.get("/", protect, surveyController.getSurveys);
 router.post("/", protect, surveyController.createSurvey);
-router.get("/:id", surveyController.getSurveyById);
-router.put("/:id", surveyController.updateSurvey);
-router.delete("/:id", surveyController.deleteSurvey);
-router.post("/:id/publish", surveyController.publishSurvey);
+router.get("/:id", protect, surveyController.getSurveyById);
+router.put("/:id", protect, surveyController.updateSurvey);
+router.delete("/:id", protect, surveyController.deleteSurvey);
+router.post("/:id/duplicate", protect, surveyController.duplicateSurvey);
+router.post("/:id/publish", protect, surveyController.publishSurvey);
 
 export default router;
