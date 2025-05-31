@@ -42,14 +42,14 @@ class ApiClient {
 
   // ================= AUTH =================
   async login(email: string, password: string) {
-    return this.request("/auth/login", {
+    return this.request("/api/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
     });
   }
 
   async register(email: string, password: string, name: string) {
-    return this.request("/auth/register", {
+    return this.request("/api/auth/register", {
       method: "POST",
       body: JSON.stringify({ email, password, name }),
     });
